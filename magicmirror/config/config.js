@@ -28,35 +28,39 @@ let config = {
 		},
 		{
 			module: "clock",
-			position: "top_left",
+			position: "top_center",
 			config: {
 				timezone: "Europe/Madrid",
-				displaySeconds: false,
+				displaySeconds: true,
 				showDate: true,
-				dateFormat: "dddd, D [de] MMMM [de] YYYY"
+				dateFormat: "dddd, D [de] MMMM [de] YYYY",
+				showPeriod: false,
+				clockBold: true
 			}
 		},
 		{
 			module: "compliments",
-			position: "lower_third",
+			position: "middle_center",
 			config: {
+				updateInterval: 10000,
+				fadeSpeed: 4000,
 				compliments: {
 					anytime: [
-						"¡Buen día!",
-						"¡Que tengas un gran día!",
-						"¡Disfruta tu música!"
+						"🎵 Reproduciendo en Spotify",
+						"♪ Disfruta tu música ♪",
+						"🎶 RaspberryPi Music Player"
 					],
 					morning: [
-						"¡Buenos días!",
-						"¡Que tengas una mañana genial!"
+						"☀️ Buenos días",
+						"🎵 Música para empezar el día"
 					],
 					afternoon: [
-						"¡Buenas tardes!",
-						"¡Sigue así!"
+						"☁️ Buenas tardes",
+						"♪ Música para la tarde"
 					],
 					evening: [
-						"¡Buenas noches!",
-						"¡Dulces sueños!"
+						"🌙 Buenas noches",
+						"🎶 Música para relajarse"
 					]
 				}
 			}
