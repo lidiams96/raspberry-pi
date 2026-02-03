@@ -1,0 +1,45 @@
+services:
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    network_mode: host
+    environment:
+      TZ: Europe/Madrid
+      WEBPASSWORD: ${WEBPASSWORD}
+    volumes:
+      - ./pihole/etc-pihole:/etc/pihole
+      - ./pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+    restart: unless-stopped
+
+  raspotify:
+    image: giof71/librespot:latest
+    container_name: raspotify
+    network_mode: host
+    devices:
+      - /dev/snd:/dev/snd
+    volumes:
+      - /var/run/dbus:/var/run/dbus:ro
+      - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+    environment:
+      LIBRESPOT_NAME: "RaspberryPi"
+      LIBRESPOT_BACKEND: "alsa"
+      LIBRESPOT_DEVICE: "plughw:CARD=Audio,DEV=0"
+      LIBRESPOT_BITRATE: "320"
+      LIBRESPOT_VOLUME_CTRL: "logarithmic"
+      LIBRESPOT_INITIAL_VOLUME: "70"
+      LIBRESPOT_VOLUME_RANGE: "80"
+    group_add:
+      - audio
+    restart: unless-stopped
+
+  magicmirror:
+    image: karsten13/magicmirror:latest
+    container_name: magicmirror
+    ports:
+      - "${MM_PORT}:8080"
+    environment:
+      TZ: Europe/Madrid
+    volumes:
+      - ./magicmirror/config:/opt/magic_mirror/config
+      - ./magicmirror/modules:/opt/magic_mirror/modules
+    restart: unless-stopped
