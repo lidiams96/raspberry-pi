@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
 
   magicmirror:
-    image: karsten13/magicmirror:latest
+    image: bastilimbach/docker-magicmirror:latest
     container_name: magicmirror
     ports:
       - "${MM_PORT}:8080"
@@ -41,4 +41,5 @@ services:
       TZ: Europe/Madrid
     volumes:
       - ./magicmirror/config:/opt/magic_mirror/config
+      - ./magicmirror/modules:/opt/magic_mirror/modules
     restart: unless-stopped
