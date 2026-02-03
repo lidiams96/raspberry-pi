@@ -25,7 +25,7 @@ services:
       LIBRESPOT_BACKEND: "alsa"
       LIBRESPOT_DEVICE: "plughw:CARD=Audio,DEV=0"
       LIBRESPOT_BITRATE: "320"
-      LIBRESPOT_VOLUME_CTRL: "logarithmic"
+      LIBRESPOT_VOLUME_CTRL: "log"
       LIBRESPOT_INITIAL_VOLUME: "70"
       LIBRESPOT_VOLUME_RANGE: "80"
     group_add:
