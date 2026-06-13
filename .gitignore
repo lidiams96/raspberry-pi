@@ -1,6 +1,11 @@
 # Environment variables
 .env
 
+# Datos/estado de los servicios (no deben versionarse)
+pihole/etc-pihole/
+pihole/etc-dnsmasq.d/
+tailscale/state/
+
 # Python
 __pycache__/
 *.py[cod]
