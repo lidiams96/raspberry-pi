@@ -26,10 +26,66 @@ services:
       LIBRESPOT_DEVICE: "plughw:CARD=Audio,DEV=0"
       LIBRESPOT_BITRATE: "320"
       LIBRESPOT_VOLUME_CTRL: "log"
-      LIBRESPOT_INITIAL_VOLUME: "70"
-      LIBRESPOT_VOLUME_RANGE: "80"
+      # Arranca a tope; el volumen final lo controlas desde el amplificador.
+      # Antes estaba a 70 => doble atenuacion (librespot + ALSA) = sonido bajo.
+      LIBRESPOT_INITIAL_VOLUME: "100"
     group_add:
       - audio
+    restart: unless-stopped
+
+  # AirPlay 2 (mikebrady/shairport-sync).
+  # Soluciona el control de volumen del iPhone: con AirPlay los botones de
+  # volumen del iPhone funcionan de forma nativa (a diferencia de Spotify Connect).
+  # Aparece como altavoz "RaspberryPi (AirPlay)" en cualquier app de iOS.
+  shairport-sync:
+    image: mikebrady/shairport-sync:latest
+    container_name: shairport-sync
+    network_mode: host
+    devices:
+      - /dev/snd:/dev/snd
+    volumes:
+      - ./shairport-sync/shairport-sync.conf:/etc/shairport-sync.conf:ro
+      - /var/run/dbus:/var/run/dbus
+      - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+    group_add:
+      - audio
+    restart: unless-stopped
+
+  # VPN: acceso a tu red (y a Pi-hole) desde fuera de casa.
+  # Tras 'docker compose up', autentica con:  docker exec tailscale tailscale up
+  # (o usa un TS_AUTHKEY en .env). Luego, en la consola de Tailscale,
+  # pon la IP de esta Pi como DNS para bloquear anuncios estes donde estes.
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale
+    hostname: raspberrypi
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ./tailscale/state:/var/lib/tailscale
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+    restart: unless-stopped
+
+  # Dashboard con todos tus servicios en un sitio.
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./homepage/config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: Europe/Madrid
+      # Ajusta a la IP/host con que accedes (ver README).
+      HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS:-localhost:3000}
     restart: unless-stopped
 
   # magicmirror:

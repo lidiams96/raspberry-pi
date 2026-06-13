@@ -1,0 +1,11 @@
+title: Raspberry Pi
+theme: dark
+color: slate
+
+layout:
+  Red:
+    style: row
+    columns: 3
+  Multimedia:
+    style: row
+    columns: 2

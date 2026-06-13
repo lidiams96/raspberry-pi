@@ -1,0 +1,27 @@
+# Ajusta las URLs si tu Pi no responde a "raspberrypi.local"
+# (puedes usar su IP local, p.ej. http://192.168.1.50/admin).
+
+- Red:
+    - Pi-hole:
+        href: http://raspberrypi.local/admin
+        description: Bloqueo de anuncios (DNS)
+        icon: pi-hole.png
+        widget:
+          type: pihole
+          url: http://raspberrypi.local
+          version: 6
+          # key: <tu_app_password_de_pihole>   # opcional, para ver estadisticas
+
+    - Tailscale:
+        href: https://login.tailscale.com/admin/machines
+        description: VPN / acceso remoto
+        icon: tailscale.png
+
+- Multimedia:
+    - Spotify Connect:
+        description: Reproductor librespot (RaspberryPi)
+        icon: spotify.png
+
+    - AirPlay:
+        description: shairport-sync (RaspberryPi)
+        icon: mdi-apple-airplay

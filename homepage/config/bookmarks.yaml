@@ -1,0 +1,10 @@
+- Documentacion:
+    - Pi-hole:
+        - abbr: PH
+          href: https://docs.pi-hole.net/
+    - Tailscale:
+        - abbr: TS
+          href: https://tailscale.com/kb/
+    - shairport-sync:
+        - abbr: AP
+          href: https://github.com/mikebrady/shairport-sync
