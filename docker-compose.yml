@@ -41,12 +41,18 @@ services:
     image: mikebrady/shairport-sync:latest
     container_name: shairport-sync
     network_mode: host
+    # SYS_NICE: permite prioridad de tiempo real para el audio
+    # (si no, falla con "Can not set realtime properties of a thread").
+    cap_add:
+      - SYS_NICE
     devices:
       - /dev/snd:/dev/snd
     volumes:
       - ./shairport-sync/shairport-sync.conf:/etc/shairport-sync.conf:ro
+      # Solo dbus: shairport descubre por mDNS a traves del avahi del host
+      # via D-Bus. NO montar el socket de avahi (la imagen lo gestiona distinto
+      # que librespot y provoca un bucle de reinicio).
       - /var/run/dbus:/var/run/dbus
-      - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
     group_add:
       - audio
     restart: unless-stopped
