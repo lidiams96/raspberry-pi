@@ -60,11 +60,18 @@ Sigue **[host-setup/README.md](host-setup/README.md)**: instala y configura
 |---|---|---|
 | `WEBPASSWORD` | Contraseña del panel de Pi-hole | La eliges tú |
 | `PIHOLE_API_KEY` | Clave del widget de Pi-hole en Homepage | Misma que `WEBPASSWORD` (o una *app password* de Pi-hole) |
-| `HOMEPAGE_ALLOWED_HOSTS` | Host(s) desde los que abrir Homepage | p. ej. `raspberrypi.local:3000,192.168.1.146:3000` |
+| `HOMEPAGE_ALLOWED_HOSTS` | Host(s):puerto permitidos en la URL del dashboard | LAN: `raspberrypi.local:3000,<IP-LAN>:3000` · VPN: `raspberrypi:3000,raspberrypi.<tailnet>.ts.net:3000` |
 | `TS_AUTHKEY` | Alta inicial de Tailscale | Auth key en [Tailscale → Keys](https://login.tailscale.com/admin/settings/keys). Tras el alta, se puede vaciar |
 
 > El `.env` **no se versiona** (está en `.gitignore`). Tampoco los datos de
 > Pi-hole (`pihole/`) ni el estado de Tailscale (`tailscale/`).
+
+> ⚠️ **Importante:** tras editar el `.env`, **recrea el contenedor afectado** —
+> los cambios solo se aplican al recrear, no en caliente:
+> ```bash
+> docker compose up -d homepage      # (o el servicio que toque)
+> ```
+> Verifica que tomó el valor con: `docker exec homepage env | grep <VARIABLE>`.
 
 ---
 
