@@ -52,4 +52,6 @@ services:
       TZ: Europe/Madrid
       # Ajusta a la IP/host con que accedes (ver README).
       HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS:-localhost:3000}
+      # Clave de API de Pi-hole para el widget (desde .env, no se versiona).
+      HOMEPAGE_VAR_PIHOLE_KEY: ${PIHOLE_API_KEY:-}
     restart: unless-stopped

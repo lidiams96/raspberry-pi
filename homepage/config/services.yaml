@@ -8,9 +8,9 @@
         icon: pi-hole.png
         widget:
           type: pihole
-          url: http://raspberrypi.local
+          url: http://192.168.1.146       # IP de la Pi (el contenedor no resuelve .local)
           version: 6
-          # key: <tu_app_password_de_pihole>   # opcional, para ver estadisticas
+          key: "{{HOMEPAGE_VAR_PIHOLE_KEY}}"   # se rellena desde .env (PIHOLE_API_KEY)
 
     - Tailscale:
         href: https://login.tailscale.com/admin/machines
