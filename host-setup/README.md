@@ -82,3 +82,18 @@ echo 'lwrespawn uxplay -avdec -fs -vs waylandsink &' >> ~/.config/labwc/autostar
 
 `lwrespawn` relanza UxPlay si se cae. Tras reiniciar, UxPlay queda disponible
 solo (selecciona "RaspberryPi" en *Duplicar pantalla* del iPhone).
+
+### Modo "media-box" (sin panel del escritorio)
+
+Como la Pi en la tele solo hace de receptor AirPlay (no se interactúa con su
+escritorio ahí), conviene quitar el panel: así la tele queda limpia y no aparece
+la "barra fantasma" duplicada al cerrar el espejado a pantalla completa.
+
+```bash
+sed -i '/wf-panel-pi/d' ~/.config/labwc/autostart    # quitar el panel
+# (si alguna vez lo quieres de vuelta, re-añade la linea
+#  '/usr/bin/lwrespawn /usr/bin/wf-panel-pi &')
+```
+
+Glitch puntual del panel (si lo mantienes): `pkill wf-panel-pi` lo redibuja
+limpio (lwrespawn lo relanza).
