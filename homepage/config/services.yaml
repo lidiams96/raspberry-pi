@@ -18,10 +18,10 @@
         icon: tailscale.png
 
 - Multimedia:
-    - Spotify Connect:
-        description: Reproductor librespot (RaspberryPi)
-        icon: spotify.png
+    - AirPlay (audio):
+        description: shairport-sync nativo (RaspberryPi)
+        icon: mdi-apple-airplay-audio
 
-    - AirPlay:
-        description: shairport-sync (RaspberryPi)
+    - AirPlay (vídeo / pantalla):
+        description: UxPlay nativo -> TV por HDMI
         icon: mdi-apple-airplay

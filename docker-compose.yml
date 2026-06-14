@@ -11,28 +11,6 @@ services:
       - ./pihole/etc-dnsmasq.d:/etc/dnsmasq.d
     restart: unless-stopped
 
-  raspotify:
-    image: giof71/librespot:latest
-    container_name: raspotify
-    network_mode: host
-    devices:
-      - /dev/snd:/dev/snd
-    volumes:
-      - /var/run/dbus:/var/run/dbus:ro
-      - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
-    environment:
-      LIBRESPOT_NAME: "RaspberryPi"
-      LIBRESPOT_BACKEND: "alsa"
-      LIBRESPOT_DEVICE: "plughw:CARD=Audio,DEV=0"
-      LIBRESPOT_BITRATE: "320"
-      LIBRESPOT_VOLUME_CTRL: "log"
-      # Arranca a tope; el volumen final lo controlas desde el amplificador.
-      # Antes estaba a 70 => doble atenuacion (librespot + ALSA) = sonido bajo.
-      LIBRESPOT_INITIAL_VOLUME: "100"
-    group_add:
-      - audio
-    restart: unless-stopped
-
   # NOTA: shairport-sync (AirPlay) y UxPlay (espejado de video) NO van en Docker.
   # La imagen Docker de shairport-sync monta su propio D-Bus de sistema y, con
   # red host + el dbus del host montado, machaca el bus del sistema y tira
