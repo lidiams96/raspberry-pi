@@ -1,26 +1,57 @@
+# ============================================================================
+#  Raspberry Pi 5 — servicios en Docker
+# ============================================================================
+#  Lo que va en Docker: Pi-hole (adblock DNS), Tailscale (VPN) y Homepage
+#  (dashboard). shairport-sync (AirPlay audio) y UxPlay (AirPlay vídeo) van
+#  NATIVOS en el sistema -> ver host-setup/.
+#
+#  Variables (${...}) se leen de un archivo .env junto a este (no versionado).
+#  Plantilla: env.example.
+# ============================================================================
+
 services:
+
+  # --------------------------------------------------------------------------
+  # Pi-hole — servidor DNS que bloquea anuncios/rastreadores para toda la red.
+  #   - network_mode: host  -> escucha el DNS (puerto 53) en todas las interfaces
+  #     del host, incluida la de Tailscale (necesario para el adblock fuera).
+  #   - Panel web: http://raspberrypi.local/admin  (contraseña = WEBPASSWORD)
+  #   - Datos persistentes en ./pihole (no se versiona).
+  # --------------------------------------------------------------------------
   pihole:
     image: pihole/pihole:latest
     container_name: pihole
     network_mode: host
     environment:
       TZ: Europe/Madrid
-      WEBPASSWORD: ${WEBPASSWORD}
+      WEBPASSWORD: ${WEBPASSWORD}        # contraseña del panel de Pi-hole
     volumes:
       - ./pihole/etc-pihole:/etc/pihole
       - ./pihole/etc-dnsmasq.d:/etc/dnsmasq.d
     restart: unless-stopped
 
-  # NOTA: shairport-sync (AirPlay) y UxPlay (espejado de video) NO van en Docker.
-  # La imagen Docker de shairport-sync monta su propio D-Bus de sistema y, con
-  # red host + el dbus del host montado, machaca el bus del sistema y tira
-  # systemd/logind. Estos dos servicios se instalan NATIVOS en la Pi (usan el
-  # avahi/dbus/audio/pantalla del host). Ver host-setup/ en el repo.
+  # NOTA: shairport-sync (AirPlay) y UxPlay (espejado de vídeo) NO van en Docker.
+  # La imagen Docker de shairport-sync arranca su propio D-Bus de sistema y, con
+  # red host + el /var/run/dbus del host montado, machaca el bus del sistema y
+  # tira systemd/logind. Por eso son NATIVOS (usan el avahi/dbus/audio/pantalla
+  # del host). Instalación y configuración en host-setup/.
 
-  # VPN: acceso a tu red (y a Pi-hole) desde fuera de casa.
-  # Tras 'docker compose up', autentica con:  docker exec tailscale tailscale up
-  # (o usa un TS_AUTHKEY en .env). Luego, en la consola de Tailscale,
-  # pon la IP de esta Pi como DNS para bloquear anuncios estes donde estes.
+  # --------------------------------------------------------------------------
+  # Tailscale — VPN de malla (conecta TUS dispositivos entre sí).
+  #   Uso actual: que el iPhone use Pi-hole como DNS estés donde estés (adblock
+  #   fuera de casa) y acceder a la Pi en remoto. NO enruta tu navegación por
+  #   casa salvo que actives el "exit node" (ver bloque comentado abajo).
+  #
+  #   Alta inicial (una vez): genera una auth key en
+  #   https://login.tailscale.com/admin/settings/keys , ponla en .env como
+  #   TS_AUTHKEY y haz "docker compose up -d tailscale". Tras registrarse, la
+  #   clave ya no hace falta (puedes borrarla del .env).
+  #
+  #   Adblock fuera: en https://login.tailscale.com/admin/dns añade la IP
+  #   Tailscale de la Pi (docker exec tailscale tailscale ip -4) como Nameserver
+  #   y activa "Override local DNS". Y en Pi-hole: Settings -> DNS ->
+  #   "Permit all origins" (si no, rechaza las consultas que llegan por la VPN).
+  # --------------------------------------------------------------------------
   tailscale:
     image: tailscale/tailscale:latest
     container_name: tailscale
@@ -33,13 +64,45 @@ services:
       - /dev/net/tun:/dev/net/tun
     volumes:
       - ./tailscale/state:/var/lib/tailscale
+      # --- Exit node (opcional) ---
+      # Descomenta para que Tailscale pueda programar iptables del kernel
+      # (necesario SOLO para exit node / subnet routing). Sin esto verás un
+      # aviso de iptables en el health check, pero el uso actual funciona igual.
+      # - /lib/modules:/lib/modules:ro
     environment:
-      TS_AUTHKEY: ${TS_AUTHKEY:-}
+      TS_AUTHKEY: ${TS_AUTHKEY:-}         # solo para el alta inicial; luego vacío
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"
+      # --- Exit node (opcional) ---
+      # Anuncia esta Pi como salida a internet para tus dispositivos (útil en
+      # wifis públicas: cifra todo hasta casa y sales con tu IP doméstica).
+      # TS_EXTRA_ARGS: "--advertise-exit-node"
     restart: unless-stopped
+    # ========================================================================
+    #  CÓMO ACTIVAR EL EXIT NODE (pasos):
+    #   1) Descomenta arriba el montaje de /lib/modules y la línea TS_EXTRA_ARGS.
+    #   2) En el host, habilita el reenvío de IP (una sola vez):
+    #        echo 'net.ipv4.ip_forward=1'            | sudo tee  /etc/sysctl.d/99-tailscale.conf
+    #        echo 'net.ipv6.conf.all.forwarding=1'   | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+    #        sudo sysctl -p /etc/sysctl.d/99-tailscale.conf
+    #   3) Recrea el contenedor:  docker compose up -d tailscale
+    #   4) En la consola Tailscale (Machines -> raspberrypi -> "···" -> Edit
+    #      route settings) aprueba "Use as exit node".
+    #   5) En el iPhone (app Tailscale -> Exit node) elige "raspberrypi".
+    #  Riesgo para la LAN: ninguno por sí solo (solo da salida a internet a tus
+    #  dispositivos; NO expone tu red local — eso sería "subnet routing", aparte).
+    # ========================================================================
 
-  # Dashboard con todos tus servicios en un sitio.
+  # --------------------------------------------------------------------------
+  # Homepage — dashboard con accesos y widgets de los servicios.
+  #   - Web: http://raspberrypi.local:3000
+  #   - HOMEPAGE_ALLOWED_HOSTS: host(s) desde los que se permite abrirlo.
+  #   - HOMEPAGE_VAR_PIHOLE_KEY: clave de la API de Pi-hole para el widget de
+  #     estadísticas (se lee de .env -> PIHOLE_API_KEY; no se versiona).
+  #   - El socket de Docker (solo lectura) le permite mostrar el estado de los
+  #     contenedores.
+  #   - Configuración en homepage/config/*.yaml.
+  # --------------------------------------------------------------------------
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
@@ -50,8 +113,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       TZ: Europe/Madrid
-      # Ajusta a la IP/host con que accedes (ver README).
       HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS:-localhost:3000}
-      # Clave de API de Pi-hole para el widget (desde .env, no se versiona).
       HOMEPAGE_VAR_PIHOLE_KEY: ${PIHOLE_API_KEY:-}
     restart: unless-stopped
