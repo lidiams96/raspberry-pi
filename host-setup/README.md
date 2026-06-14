@@ -51,7 +51,7 @@ iPhone y lo pinta en la tele a través del escritorio Wayland (labwc).
 
 Comando que funciona:
 ```bash
-uxplay -avdec -vs waylandsink
+uxplay -avdec -fs -vs waylandsink
 ```
 
 ### Audio del espejado (elegir tele o amplificador)
@@ -77,7 +77,7 @@ se copia el autostart del sistema y se le añade UxPlay:
 ```bash
 mkdir -p ~/.config/labwc
 [ -f ~/.config/labwc/autostart ] || cp /etc/xdg/labwc/autostart ~/.config/labwc/autostart
-echo 'lwrespawn uxplay -avdec -vs waylandsink &' >> ~/.config/labwc/autostart
+echo 'lwrespawn uxplay -avdec -fs -vs waylandsink &' >> ~/.config/labwc/autostart
 ```
 
 `lwrespawn` relanza UxPlay si se cae. Tras reiniciar, UxPlay queda disponible
