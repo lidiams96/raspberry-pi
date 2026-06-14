@@ -8,7 +8,7 @@ Configuración de mi Raspberry Pi 5, orquestada con Docker Compose.
 |---|---|---|
 | **Pi-hole** | Bloqueo de anuncios vía DNS | `http://raspberrypi.local/admin` |
 | **librespot** (raspotify) | Receptor Spotify Connect | App de Spotify → dispositivo "RaspberryPi" |
-| **shairport-sync** | Receptor AirPlay 2 | Cualquier app iOS → altavoz "RaspberryPi" |
+| **shairport-sync** (nativo, ver [host-setup/](host-setup/)) | Receptor AirPlay 2 | Cualquier app iOS → altavoz "RaspberryPi" |
 | **Tailscale** | VPN / acceso remoto | App Tailscale + consola web |
 | **Homepage** | Dashboard de servicios | `http://raspberrypi.local:3000` |
 

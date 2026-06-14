@@ -33,29 +33,11 @@ services:
       - audio
     restart: unless-stopped
 
-  # AirPlay 2 (mikebrady/shairport-sync).
-  # Soluciona el control de volumen del iPhone: con AirPlay los botones de
-  # volumen del iPhone funcionan de forma nativa (a diferencia de Spotify Connect).
-  # Aparece como altavoz "RaspberryPi (AirPlay)" en cualquier app de iOS.
-  shairport-sync:
-    image: mikebrady/shairport-sync:latest
-    container_name: shairport-sync
-    network_mode: host
-    # SYS_NICE: permite prioridad de tiempo real para el audio
-    # (si no, falla con "Can not set realtime properties of a thread").
-    cap_add:
-      - SYS_NICE
-    devices:
-      - /dev/snd:/dev/snd
-    volumes:
-      - ./shairport-sync/shairport-sync.conf:/etc/shairport-sync.conf:ro
-      # Solo dbus: shairport descubre por mDNS a traves del avahi del host
-      # via D-Bus. NO montar el socket de avahi (la imagen lo gestiona distinto
-      # que librespot y provoca un bucle de reinicio).
-      - /var/run/dbus:/var/run/dbus
-    group_add:
-      - audio
-    restart: unless-stopped
+  # NOTA: shairport-sync (AirPlay) y UxPlay (espejado de video) NO van en Docker.
+  # La imagen Docker de shairport-sync monta su propio D-Bus de sistema y, con
+  # red host + el dbus del host montado, machaca el bus del sistema y tira
+  # systemd/logind. Estos dos servicios se instalan NATIVOS en la Pi (usan el
+  # avahi/dbus/audio/pantalla del host). Ver host-setup/ en el repo.
 
   # VPN: acceso a tu red (y a Pi-hole) desde fuera de casa.
   # Tras 'docker compose up', autentica con:  docker exec tailscale tailscale up
